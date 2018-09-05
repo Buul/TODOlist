@@ -1,9 +1,14 @@
-import React from 'react';
+import React, { Component } from 'react';
+import '../styles/app.scss';
 
-const App = () => (
-  <div id="test">
-    <h1>talkei2</h1>
-  </div>
-);
+class App extends Component {
+  handleChange = param => {
+    console.log(param);
+  };
+
+  render() {
+    return <div id="boiler" />;
+  }
+}
 
 export default App;
