@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import '../styles/app.scss';
+import Todo from './todo/Todo';
 
 class App extends Component {
   handleChange = param => {
@@ -7,7 +8,7 @@ class App extends Component {
   };
 
   render() {
-    return <div id="boiler" />;
+    return <Todo />;
   }
 }
 
