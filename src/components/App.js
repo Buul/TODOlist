@@ -1,15 +1,7 @@
-import React, { Component } from 'react';
+import React from 'react';
 import '../styles/app.scss';
-import Todo from './todo/Todo';
+import Router from '../router';
 
-class App extends Component {
-  handleChange = param => {
-    console.log(param);
-  };
-
-  render() {
-    return <Todo />;
-  }
-}
+const App = () => <Router />;
 
 export default App;
