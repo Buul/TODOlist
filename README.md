@@ -21,7 +21,7 @@ You must have the following applications installed:
 
 ```sh
 $ git clone https://github.com/Buul/TODOlist.git # or clone your own fork
-$ cd todolist
+$ cd TODOlist
 $ npm install -g yarn
 $ yarn install
 ```
