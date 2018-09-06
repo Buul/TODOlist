@@ -6,14 +6,9 @@
       "ativo": true
     },
     {
-      "id": 2,
       "description": "reunião escolar",
-      "ativo": true
-    },
-    {
-      "id": 3,
-      "description": "botar lixo para fora",
-      "ativo": false
+      "ativo": false,
+      "id": 2
     },
     {
       "id": 4,

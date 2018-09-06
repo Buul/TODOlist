@@ -1,5 +1,4 @@
 import React from 'react';
-import axios from 'axios';
 import PropTypes from 'prop-types';
 import { withStyles } from '@material-ui/core/styles';
 import Table from '@material-ui/core/Table';
@@ -120,99 +119,21 @@ class EnhancedTable extends React.Component {
 
   handleConfirmDelete = () => {
     const { idSelectedDelete } = this.state;
-    const { refresh } = this.props;
-    axios
-      .delete(`http://localhost:3000/todo/${idSelectedDelete}`)
-      .then(() => {
-        const messageModal = [];
-        messageModal.push('Deletado com sucesso');
-        this.setState({
-          openModal: true,
-          titleModal: 'Sucesso',
-          messageModal,
-          btnConfirmar: false,
-        });
-        refresh();
-      })
-      .catch(e => {
-        const messageModal = [];
-        messageModal.push('Falha ao deletar o TODO');
-        messageModal.push(e.message);
-        this.setState({ openModal: true, titleModal: 'Error', messageModal, btnConfirmar: false });
-      });
+    const { remove } = this.props;
+    remove(idSelectedDelete);
+    this.setState({ openModal: false });
   };
 
-  handleSave = data => {
-    const { refresh } = this.props;
-    axios
-      .put(`http://localhost:3000/todo/${data.id}`, data)
-      .then(() => {
-        const messageModal = [];
-        messageModal.push('Todo atualizado com sucesso');
-        this.setState({
-          openModal: true,
-          openEdit: false,
-          titleModal: 'Sucesso',
-          messageModal,
-          btnConfirmar: false,
-        });
-        refresh();
-      })
-      .catch(e => {
-        const messageModal = [];
-        messageModal.push('Falha ao atualizar o TODO');
-        messageModal.push(e.message);
-        this.setState({
-          openModal: true,
-          openEdit: false,
-          titleModal: 'Error',
-          messageModal,
-          btnConfirmar: false,
-        });
-      });
+  handleEditSave = data => {
+    const { edit } = this.props;
+    edit(data);
+    this.setState({ openEdit: false });
   };
 
   handleBulkEditConcluido = params => {
-    const { refresh } = this.props;
+    const { bulkEdit } = this.props;
     const { data } = this.state;
-    params.listSelected.forEach(id => {
-      let descEdit = '';
-      data.forEach(element => {
-        if (element.id === id) {
-          descEdit = element.description;
-        }
-      });
-      axios
-        .put(`http://localhost:3000/todo/${id}`, {
-          id,
-          description: descEdit,
-          ativo: params.ativo,
-        })
-        .then(() => {
-          const messageModal = [];
-          messageModal.push('Todo atualizado com sucesso');
-          this.setState({
-            openModal: true,
-            openEdit: false,
-            titleModal: 'Sucesso',
-            messageModal,
-            btnConfirmar: false,
-          });
-          refresh();
-        })
-        .catch(e => {
-          const messageModal = [];
-          messageModal.push('Falha ao atualizar o TODO');
-          messageModal.push(e.message);
-          this.setState({
-            openModal: true,
-            openEdit: false,
-            titleModal: 'Error',
-            messageModal,
-            btnConfirmar: false,
-          });
-        });
-    });
+    bulkEdit({ ativo: params.ativo, listSelected: params.listSelected, data });
   };
 
   handleClick = (event, id) => {
@@ -367,7 +288,7 @@ class EnhancedTable extends React.Component {
           closeModal={this.handleCloseModal}
           title="Editar Todo"
           data={dataEdit}
-          onSave={this.handleSave}
+          onSave={this.handleEditSave}
         />
       </Paper>
     );
@@ -376,7 +297,9 @@ class EnhancedTable extends React.Component {
 
 EnhancedTable.propTypes = {
   classes: PropTypes.shape({}).isRequired,
-  refresh: PropTypes.func.isRequired,
+  bulkEdit: PropTypes.func.isRequired,
+  remove: PropTypes.func.isRequired,
+  edit: PropTypes.func.isRequired,
   data: PropTypes.arrayOf(
     PropTypes.shape({
       description: PropTypes.string,

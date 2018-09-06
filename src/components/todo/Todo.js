@@ -1,6 +1,8 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import axios from 'axios';
+import { connect } from 'react-redux';
+import { bindActionCreators } from 'redux';
+
 import Grid from '@material-ui/core/Grid';
 import Paper from '@material-ui/core/Paper';
 import Typography from '@material-ui/core/Typography';
@@ -14,6 +16,14 @@ import Switch from '@material-ui/core/Switch';
 import CustomModal from '../modal/CustomModal';
 import CustomTable from './table/CustomTable';
 import AddTodo from './EditTodo';
+import {
+  search as searchAction,
+  add as addAction,
+  clean as cleanAction,
+  remove as removeAction,
+  edit as editAction,
+  bulkEdit as bulkEditAction,
+} from '../../actions/todoActions';
 
 const styles = theme => ({
   root: theme.mixins.gutters({
@@ -54,18 +64,42 @@ class Todo extends Component {
     this.getAllTodos();
   }
 
-  getAllTodos = () => {
-    axios
-      .get('http://localhost:3000/todo')
-      .then(resp => {
-        this.setState({ tableData: resp.data, todoList: resp.data });
-      })
-      .catch(e => {
-        const messageModal = [];
-        messageModal.push('Falha ao buscar lista de TODO');
-        messageModal.push(e.message);
-        this.setState({ openModal: true, titleModal: 'Error', messageModal, btnConfirmar: false });
+  componentWillReceiveProps(nextProps) {
+    const { tableData } = this.state;
+    const { clear } = this.props;
+    if (nextProps.list !== tableData) {
+      this.setState({ tableData: nextProps.list, todoList: nextProps.list });
+    }
+    if (nextProps.error !== '') {
+      const messageModal = [];
+      messageModal.push(nextProps.errorCustomMessage);
+      messageModal.push(nextProps.error);
+      this.setState({
+        openModal: true,
+        openAdd: false,
+        titleModal: 'Error',
+        messageModal,
+        btnConfirmar: false,
       });
+      clear();
+    }
+    if (nextProps.success !== '') {
+      const messageModal = [];
+      messageModal.push(nextProps.success);
+      this.setState({
+        openModal: true,
+        openAdd: false,
+        titleModal: 'Sucesso',
+        messageModal,
+        btnConfirmar: false,
+      });
+      clear();
+    }
+  }
+
+  getAllTodos = () => {
+    const { search } = this.props;
+    search();
   };
 
   handleCloseModal = () => {
@@ -81,32 +115,23 @@ class Todo extends Component {
   };
 
   handleSave = data => {
-    axios
-      .post('http://localhost:3000/todo/', data)
-      .then(() => {
-        const messageModal = [];
-        messageModal.push('Todo incluído com sucesso');
-        this.setState({
-          openModal: true,
-          openAdd: false,
-          titleModal: 'Sucesso',
-          messageModal,
-          btnConfirmar: false,
-        });
-        this.getAllTodos();
-      })
-      .catch(e => {
-        const messageModal = [];
-        messageModal.push('Falha ao incluir TODO');
-        messageModal.push(e.message);
-        this.setState({
-          openModal: true,
-          openAdd: false,
-          titleModal: 'Error',
-          messageModal,
-          btnConfirmar: false,
-        });
-      });
+    const { add } = this.props;
+    add(data);
+  };
+
+  handleRemove = id => {
+    const { remove } = this.props;
+    remove(id);
+  };
+
+  handleEdit = data => {
+    const { edit } = this.props;
+    edit(data);
+  };
+
+  handleBulkEdit = data => {
+    const { bulkEdit } = this.props;
+    bulkEdit(data);
   };
 
   handleChangeChecked = name => event => {
@@ -214,7 +239,13 @@ class Todo extends Component {
             </FormControl>
           </Grid>
         </Grid>
-        <CustomTable refresh={this.getAllTodos} data={tableData} />
+        <CustomTable
+          refresh={this.getAllTodos}
+          data={tableData}
+          remove={this.handleRemove}
+          edit={this.handleEdit}
+          bulkEdit={this.handleBulkEdit}
+        />
         <CustomModal
           open={openModal}
           closeModal={this.handleCloseModal}
@@ -237,6 +268,66 @@ class Todo extends Component {
 
 Todo.propTypes = {
   classes: PropTypes.shape({}).isRequired,
+  search: PropTypes.func,
+  add: PropTypes.func,
+  edit: PropTypes.func,
+  remove: PropTypes.func,
+  bulkEdit: PropTypes.func,
+  clear: PropTypes.func,
+  list: PropTypes.arrayOf(
+    PropTypes.shape({
+      description: PropTypes.string,
+      ativo: PropTypes.bool,
+      id: PropTypes.number,
+    })
+  ),
+  error: PropTypes.string,
+  errorCustomMessage: PropTypes.string,
+  success: PropTypes.string,
 };
 
-export default withStyles(styles)(Todo);
+Todo.defaultProps = {
+  list: PropTypes.arrayOf(
+    PropTypes.shape({
+      description: '',
+      ativo: false,
+      id: 0,
+    })
+  ),
+  search: () => {},
+  clear: () => {},
+  add: () => {},
+  edit: () => {},
+  remove: () => {},
+  bulkEdit: () => {},
+  error: '',
+  errorCustomMessage: '',
+  success: '',
+};
+
+const mapStateToProps = state => ({
+  list: state.todo.list,
+  error: state.todo.error,
+  errorCustomMessage: state.todo.errorCustomMessage,
+  success: state.todo.success,
+});
+
+const mapDispatchToProps = dispatch =>
+  bindActionCreators(
+    {
+      search: searchAction,
+      add: addAction,
+      clear: cleanAction,
+      remove: removeAction,
+      edit: editAction,
+      bulkEdit: bulkEditAction,
+    },
+    dispatch
+  );
+
+export default withStyles(styles)(
+  connect(
+    mapStateToProps,
+    mapDispatchToProps
+  )(Todo)
+);
