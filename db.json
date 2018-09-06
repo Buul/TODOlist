@@ -1,0 +1,34 @@
+{
+  "todo": [
+    {
+      "id": 1,
+      "description": "comprar pão",
+      "ativo": true
+    },
+    {
+      "id": 2,
+      "description": "reunião escolar",
+      "ativo": true
+    },
+    {
+      "id": 3,
+      "description": "botar lixo para fora",
+      "ativo": false
+    },
+    {
+      "id": 4,
+      "description": "estudar NextJS",
+      "ativo": true
+    },
+    {
+      "id": 5,
+      "description": "estudar SSR",
+      "ativo": true
+    },
+    {
+      "id": 6,
+      "description": "comprar leite",
+      "ativo": true
+    }
+  ]
+}
